@@ -19,13 +19,6 @@ variable "location" {
 variable "name" {
   type        = string
   description = "The name of the this resource."
-
-  validation {
-    condition     = can(regex("TODO", var.name))
-    error_message = "The name must be TODO." # TODO remove the example below once complete:
-    #condition     = can(regex("^[a-z0-9]{5,50}$", var.name))
-    #error_message = "The name must be between 5 and 50 characters long and can only contain lowercase letters and numbers."
-  }
 }
 
 # This is required for most resource modules
@@ -33,6 +26,19 @@ variable "resource_group_name" {
   type        = string
   description = "The resource group where the resources will be deployed."
 }
+
+variable "power_bi_service_enabled" {
+  description = "Whether to enable Power BI integration for Analysis Services"
+  type        = bool
+  default     = true
+}
+
+variable "admin_users" {
+  description = "List of administrator users for the Analysis Services server"
+  type        = list(string)
+  default     = []
+}
+
 
 # required AVM interfaces
 # remove only if not supported by the resource

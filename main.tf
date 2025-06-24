@@ -17,6 +17,8 @@ resource "azurerm_analysis_services_server" "server" {
   location                  = azurerm_resource_group.rg.location
   sku                       = var.sku
   backup_blob_container_uri = var.backup_blob_container_uri
+  power_bi_service_enabled = var.power_bi_service_enabled
+  admin_users              = var.admin_users
 
   ipv4_firewall_rule {
     name        = "AllowFromAll"
