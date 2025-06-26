@@ -1,29 +1,26 @@
 resource "azurerm_resource_group" "rg" {
   location = var.location
-  name     = var.name # calling code must supply the name
+  name     = var.name
   tags     = var.tags
 }
 
-resource "random_string" "azurerm_analysis_services_server_name" {
-  length  = 25
-  upper   = false
-  numeric = false
-  special = false
-}
-
 resource "azurerm_analysis_services_server" "server" {
-  name                      = random_string.azurerm_analysis_services_server_name.result
+  name                      = var.name
   resource_group_name       = azurerm_resource_group.rg.name
   location                  = azurerm_resource_group.rg.location
   sku                       = var.sku
   backup_blob_container_uri = var.backup_blob_container_uri
-  power_bi_service_enabled = var.power_bi_service_enabled
-  admin_users              = var.admin_users
+  power_bi_service_enabled  = var.power_bi_service_enabled
+  admin_users               = var.admin_users
+  querypool_connection_mode = var.querypool_connection_mode
 
-  ipv4_firewall_rule {
-    name        = "AllowFromAll"
-    range_start = "0.0.0.0"
-    range_end   = "255.255.255.255"
+  dynamic "ipv4_firewall_rule" {
+    for_each = var.ipv4_firewall_rules
+    content {
+      name        = ipv4_firewall_rule.value.name
+      range_start = ipv4_firewall_rule.value.range_start
+      range_end   = ipv4_firewall_rule.value.range_end
+    }
   }
 }
 

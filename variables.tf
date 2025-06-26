@@ -1,36 +1,45 @@
 variable "sku" {
   type        = string
-  description = "The sku name of the Azure Analysis Services server to create. Choose from: B1, B2, D1, S0, S1, S2, S3, S4, S8, S9. Some skus are region specific. See https://docs.microsoft.com/en-us/azure/analysis-services/analysis-services-overview#availability-by-region"
-  default     = "S0"
+  description = "The sku name of the Azure Analysis Services server to create. Choose from: B1, B2, D1, S0, S1, S2, S3, S4, S8, S9. Some skus are region specific. See https://docs.microsoft.com/en-us/azure/analysis-services/analysis-services-overview#availability-by-regionSKU for the Analysis Services Server. Possible values are: D1, B1, B2, S0, S1, S2, S4, S8, S9, S8v2 and S9v2"
+  default     = "D1"
 }
 
 variable "backup_blob_container_uri" {
   type        = string
-  description = "The SAS URI to a private Azure Blob Storage container with read, write and list permissions. Required only if you intend to use the backup/restore functionality. See https://docs.microsoft.com/en-us/azure/analysis-services/analysis-services-backup"
+  description = "URI and SAS token for a blob container to store backups."
   default     = null
 }
 
 variable "location" {
   type        = string
-  description = "Azure region where the resource should be deployed."
+  description = "The Azure location where the Analysis Services Server exists. Changing this forces a new resource to be created."
   nullable    = false
 }
 
 variable "name" {
   type        = string
-  description = "The name of the this resource."
+  description = "The name of the Analysis Services Server. Only lowercase Alphanumeric characters allowed, starting with a letter. Changing this forces a new resource to be created."
+
+  validation {
+    condition = (
+      length(var.name) >= 3 &&
+      length(var.name) <= 63 &&
+      can(regex("^[a-z][a-z0-9]+$", var.name))
+    )
+    error_message = "The name must start with a lowercase letter, be lowercase alphanumeric, and contain 3 to 63 characters."
+  }
 }
 
 # This is required for most resource modules
 variable "resource_group_name" {
   type        = string
-  description = "The resource group where the resources will be deployed."
+  description = "The name of the Resource Group in which the Analysis Services Server should be exist. Changing this forces a new resource to be created."
 }
 
 variable "power_bi_service_enabled" {
-  description = "Whether to enable Power BI integration for Analysis Services"
+  description = "Indicates if the Power BI service is allowed to access or not."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "admin_users" {
@@ -39,28 +48,20 @@ variable "admin_users" {
   default     = []
 }
 
+variable "querypool_connection_mode" {
+  description = "Controls how the read-write server is used in the query pool. If this value is set to All then read-write servers are also used for queries. Otherwise with ReadOnly these servers do not participate in query operations. Defaults to All."
+  type        = string
+  default     = "All"
+}
 
-# required AVM interfaces
-# remove only if not supported by the resource
-# tflint-ignore: terraform_unused_declarations
-variable "customer_managed_key" {
-  type = object({
-    key_vault_resource_id = string
-    key_name              = string
-    key_version           = optional(string, null)
-    user_assigned_identity = optional(object({
-      resource_id = string
-    }), null)
-  })
-  default     = null
-  description = <<DESCRIPTION
-A map describing customer-managed keys to associate with the resource. This includes the following properties:
-- `key_vault_resource_id` - The resource ID of the Key Vault where the key is stored.
-- `key_name` - The name of the key.
-- `key_version` - (Optional) The version of the key. If not specified, the latest version is used.
-- `user_assigned_identity` - (Optional) An object representing a user-assigned identity with the following properties:
-  - `resource_id` - The resource ID of the user-assigned identity.
-DESCRIPTION  
+variable "ipv4_firewall_rules" {
+  type = list(object({
+    name        = string
+    range_start = string
+    range_end   = string
+  }))
+  description = "List of IPv4 firewall rules"
+  default     = []
 }
 
 variable "diagnostic_settings" {
