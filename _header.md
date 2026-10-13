@@ -1,3 +1,3 @@
-# terraform-azurerm-avm-template
+# Analysis Services Server
 
-This is a template repo for Terraform Azure Verified Modules.
+**Status: Proposed / unimplemented.** This repository contains the generic virtual network starter from Avm.Authoring, not an Analysis Services Server implementation. Do not use it to deploy `Microsoft.AnalysisServices/servers`.
